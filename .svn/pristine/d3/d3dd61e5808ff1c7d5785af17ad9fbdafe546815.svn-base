@@ -1,0 +1,103 @@
+<template>
+	<button type="button" :class="className" ref="payBtn" @click="paying">{{ text }}</button>
+</template>
+
+<script>
+import {mapState} from 'vuex'
+import { createOrder, wxPay } from '../common/api'
+
+export default {
+    props: {
+        className: {
+		    type: String,
+			default: ''
+		},
+        text: {
+		    type: String,
+	        default: '支付'
+        },
+	    payData: {
+            type: Object,
+		    default: {}
+	    },
+        amount: {
+            type: Number,
+            default: 0
+        },
+        payType: {
+            type: Number,
+            default: 0
+        }
+    },
+    computed: {
+        ...mapState({
+            openid: state => state.wxPay.openid
+        })
+    },
+    methods: {
+        paying() {
+            let data = {
+                paycode: 0, //0支付 1收入
+                amount: this.amount, //金额
+                paytype: this.payType, //付款类型：1-水，2-电，4-煤，8-定金，16-房租，32-维修费用，64-滞纳金
+                houseid: this.payData.houseId, //房源ID
+                roomid: this.payData.roomId, //房间ID
+                userid: this.payData.userId, //用户ID
+            }
+            //this.wxPay('12547')
+            createOrder(this.$refs.payBtn, data).then(res => {
+                if (res.ReturnCode == '0' && res.Data && res.Data.OrderSN) {
+					this.wxPay(res.Data.OrderSN)
+                } else {
+                    this.$vux.toast.text('支付失败，请重试')
+                }
+            }).catch(res => {
+                this.$vux.toast.text('支付失败，请重试')
+            })
+	    },
+	    wxPay(orderId) {
+            //this.$emit('pay-success')
+            let openid = (this.openid || '').replace(/_/g, '--')
+            wxPay(this.$refs.payBtn, {
+                openid: openid,
+                ordersn: orderId, //订单号 Math.ceil(Math.random() * 12345678)
+                amount: this.amount
+            }).then(res => {
+                if (res.ReturnCode == '0' && res.Data) {
+                    let self = this
+                    try {
+                        let payData = {}
+                        let data = JSON.parse(res.Data.WeixinJson)
+                        data.forEach(item => {
+                            payData[item.Key] = item.Value
+                        })
+                        wx.chooseWXPay({
+                            timestamp: payData.timeStamp,
+                            nonceStr: payData.nonceStr,
+                            package: payData.package,
+                            signType: payData.signType,
+                            paySign: payData.paySign,
+                            success: function (res) {
+                                self.$emit('pay-success')
+                            },
+                            fail: function (res) {
+                                self.$vux.toast.text('支付失败，请重试')
+                            }
+                        })
+                    }catch (e) {
+                        this.$vux.toast.text('支付失败，请重试')
+                    }
+                } else {
+                    this.$vux.toast.text('支付失败，请重试')
+                }
+            }).catch(res => {
+                this.$vux.toast.text('支付失败，请重试')
+            })
+	    }
+    }
+}
+</script>
+
+<style lang="scss" scoped>
+@import "../assets/css/base";
+</style>

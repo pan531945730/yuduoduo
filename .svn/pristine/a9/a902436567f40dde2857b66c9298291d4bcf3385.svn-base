@@ -1,0 +1,48 @@
+<template>
+	<div class="index-body">
+		<h1>{{ msg }}</h1>
+		<router-link to="/search">搜索</router-link>
+		<router-link to="/login">登录</router-link>
+		<router-link to="/contractChoose?origin=onlinePay">在线支付</router-link>
+		<router-link to="/contractChoose?origin=historyPay">历史缴费</router-link>
+		<router-link to="/list">房源列表</router-link>
+		<router-link to="/contractChoose?a=132&bb=456">选择合同</router-link>
+		<router-link to="/contractChoose?origin=contract">签订合同</router-link>
+		<router-link to="/contractChoose?origin=repair">报修服务</router-link>
+		<router-link to="/contractChoose?origin=repairDetail">报修详情</router-link>
+		<router-link to="/contractChoose?origin=repairSubmit">立即报修</router-link>
+		<router-link to="/signa">在线签名</router-link>
+		<router-link to="/contractChoose?origin=contractSuccess">签订成功</router-link>
+		<router-link to="/contractChoose?origin=contractChick">查看租约</router-link>
+		<router-link to="/contractChoose?origin=contractSignature">合同签名</router-link>
+	</div>
+</template>
+
+<script>
+export default {
+    name: 'hello',
+    data () {
+        return {
+            msg: 'Welcome to Your Vue.js App'
+        }
+    },
+    created() {
+        this.setTitle('首页')
+    },
+}
+</script>
+
+<style lang="scss" scoped>
+.index-body{
+	text-align: center;
+}
+h1{
+	font-size: 22px;
+	padding-bottom: 20px;
+}
+a {
+	color: blue;
+	display: block;
+	line-height: 28px;
+}
+</style>
